@@ -106,9 +106,14 @@ class TaskAPI(Resource):
         return {'result': True}
 
 
+class HealthCheck(Resource):
+    def get(self):
+        return 200
+
 api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<int:id>', endpoint='task')
+api.add_resource(HealthCheck, "/healthcheck", endpoint="healthcheck")
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=8080)
+    app.run(debug=True, host="0.0.0.0", port=5000)
