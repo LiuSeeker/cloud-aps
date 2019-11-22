@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, abort, make_response, redirect, request
 from flask_restful import Api, Resource, reqparse, fields, marshal
+import sys
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
@@ -21,8 +22,11 @@ task_fields = {
     'title': fields.String,
     'description': fields.String,
     'done': fields.Boolean,
-    'uri': fields.Url('task')
+    'uri': fields.Url('tasks')
 }
+
+if len(sys.argv) > 1:
+    public_ip = str(sys.argv[1])
 
 
 class TaskListAPI(Resource):
@@ -37,7 +41,7 @@ class TaskListAPI(Resource):
         super(TaskListAPI, self).__init__()
 
     def get(self):
-        return redirect("http://3.135.218.32:5000/tasks", code=302)
+        return redirect("http://"+public_ip+":5000/tasks", code=302)
 
     def post(self):
         args = self.reqparse.parse_args()
@@ -45,12 +49,12 @@ class TaskListAPI(Resource):
             'title': args['title'],
             'description': args['description']
         }
-        return redirect("http://3.135.218.32:5000/tasks?title="+task["title"]+"&description="+task["description"])
+        return redirect("http://"+public_ip+":5000/tasks?title="+task["title"]+"&description="+task["description"])
 
 
 class HealthCheck(Resource):
     def get(self):
-        return redirect("http://3.135.218.32:5000/healthcheck", code=302)
+        return redirect("http://"+public_ip+":5000/healthcheck", code=302)
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 api.add_resource(HealthCheck, "/healthcheck", endpoint="healthcheck")
