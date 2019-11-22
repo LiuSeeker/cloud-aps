@@ -1,25 +1,8 @@
-
-from flask import Flask, jsonify, abort, make_response
+from flask import Flask, jsonify, abort, make_response, redirect
 from flask_restful import Api, Resource, reqparse, fields, marshal
-from flask_httpauth import HTTPBasicAuth
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
-auth = HTTPBasicAuth()
-
-
-@auth.get_password
-def get_password(username):
-    if username == 'liu':
-        return 'oba'
-    return None
-
-
-@auth.error_handler
-def unauthorized():
-    # return 403 instead of 401 to prevent browsers from displaying the default
-    # auth dialog
-    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 tasks = [
     {
@@ -45,7 +28,6 @@ task_fields = {
 
 
 class TaskListAPI(Resource):
-    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -57,7 +39,7 @@ class TaskListAPI(Resource):
         super(TaskListAPI, self).__init__()
 
     def get(self):
-        return {'tasks': [marshal(task, task_fields) for task in tasks]}
+        return redirect("http://18.222.108.29:5000/")
 
     def post(self):
         args = self.reqparse.parse_args()
@@ -72,7 +54,6 @@ class TaskListAPI(Resource):
 
 
 class TaskAPI(Resource):
-    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -108,10 +89,10 @@ class TaskAPI(Resource):
 
 class HealthCheck(Resource):
     def get(self):
-        return 200
+        return redirect("http://18.222.108.29:5000/healthcheck", code=302)
 
-api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
-api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<int:id>', endpoint='task')
+api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
+api.add_resource(TaskAPI, '/tasks/<int:id>', endpoint='task')
 api.add_resource(HealthCheck, "/healthcheck", endpoint="healthcheck")
 
 
