@@ -49,14 +49,31 @@ class TaskListAPI(Resource):
             'title': args['title'],
             'description': args['description']
         }
-        return redirect("http://"+public_ip+":5000/tasks?title="+task["title"]+"&description="+task["description"])
+        return redirect("http://"+public_ip+":5000/tasks") ##arrumar
 
+class TaskAPI(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('title', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
+        self.reqparse.add_argument('done', type=bool, location='json')
+        super(TaskAPI, self).__init__()
+
+    def get(self, id):
+        return redirect("http://"+public_ip+":5000/tasks/"+id, code=302)
+
+    def put(self, id):
+       return redirect("http://"+public_ip+":5000/tasks/"+id)##arrumar
+
+    def delete(self, id):
+        return redirect("http://"+public_ip+":5000/tasks/"+id)##arrumar
 
 class HealthCheck(Resource):
     def get(self):
         return redirect("http://"+public_ip+":5000/healthcheck", code=302)
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
+api.add_resource(TaskAPI, '/tasks/<id>', endpoint='task')
 api.add_resource(HealthCheck, "/healthcheck", endpoint="healthcheck")
 
 

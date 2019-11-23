@@ -2,7 +2,8 @@ from pymongo import MongoClient
 from pprint import pprint
 from flask import Flask, jsonify, abort, make_response, request
 from flask_restful import Api, Resource, reqparse, fields, marshal
-from bson import ObjectId
+from bson import ObjectId, json_util
+import bson
 import json
 
 app = Flask(__name__, static_url_path="")
@@ -59,10 +60,7 @@ class TaskListAPI(Resource):
 		return {'tasks': l_ret}
 
 	def post(self):
-		print("HGHFJHGJHG")
-		print(self.reqparse.parse_args())
-		print("gsdhgfskjhgdfj")
-		return "dasd", 201
+		args = self.reqparse.parse_args()
 		task = {
 			'title': args['title'],
 			'description': args['description'],
@@ -73,11 +71,63 @@ class TaskListAPI(Resource):
 		
 		return {'task': marshal(task, task_fields)}, 201
 
+class TaskAPI(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('title', type=str, location='json')
+		self.reqparse.add_argument('description', type=str, location='json')
+		self.reqparse.add_argument('done', type=bool, location='json')
+		super(TaskAPI, self).__init__()
+
+	def get(self, id):
+		try:
+			x = collection.find_one({"_id": ObjectId(id)})
+		except bson.errors.InvalidId as e:
+			return "Formato de Id incorreto"
+		if x is None:
+			return "Nao existe task com o id \'{}\'".format(id)
+		return parser_find(x)
+
+	def put(self, id):
+		try:
+			object_id = ObjectId(id)
+		except bson.errors.InvalidId as e:
+			return "Formato de Id incorreto"
+		x = collection.find_one({"_id": object_id})
+		if x is None:
+			return "Nao existe task com o id \'{}\'".format(id)
+
+		args = self.reqparse.parse_args()
+
+		task = {
+			'title': args['title'],
+			'description': args['description'],
+			'done': args["done"]
+		}
+
+		collection.update_one({'_id': ObjectId(id)},
+					{'$set':task}, upsert=False)
+		return {'task': marshal(task, task_fields)}
+
+	def delete(self, id):
+		try:
+			object_id = ObjectId(id)
+		except bson.errors.InvalidId as e:
+			return "Formato de Id incorreto"
+		x = collection.find_one({"_id": object_id})
+		if x is None:
+			return "Nao existe task com o id \'{}\'".format(id)
+
+		collection.delete_one({"_id": object_id})
+		return {'result': True}
+
+
 class HealthCheck(Resource):
 	def get(self):
 		return "OK"
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
+api.add_resource(TaskAPI, '/tasks/<id>', endpoint='task')
 api.add_resource(HealthCheck, "/healthcheck", endpoint="healthcheck")
 
 if __name__ == '__main__':
