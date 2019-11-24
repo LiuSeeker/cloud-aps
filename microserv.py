@@ -5,11 +5,16 @@ from flask_restful import Api, Resource, reqparse, fields, marshal
 from bson import ObjectId, json_util
 import bson
 import json
+import sys
+
+if len(sys.argv) > 1:
+    public_ip = str(sys.argv[1])
+
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
 
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb://"+public_ip+":27017/")
 
 db = client["cloud"]
 
