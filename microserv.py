@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from pprint import pprint
-from flask import Flask, jsonify, abort, make_response, request
+from flask import Flask, jsonify, abort, make_response
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from bson import ObjectId, json_util
 import bson

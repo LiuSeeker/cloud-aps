@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, abort, make_response, redirect, request
 from flask_restful import Api, Resource, reqparse, fields, marshal
+import requests
+import json
 import sys
 
 app = Flask(__name__, static_url_path="")
@@ -41,7 +43,7 @@ class TaskListAPI(Resource):
         super(TaskListAPI, self).__init__()
 
     def get(self):
-        return redirect("http://"+public_ip+":5000/tasks", code=302)
+        return requests.get("http://"+public_ip+":5000/tasks").json()
 
     def post(self):
         args = self.reqparse.parse_args()
@@ -49,7 +51,7 @@ class TaskListAPI(Resource):
             'title': args['title'],
             'description': args['description']
         }
-        return redirect("http://"+public_ip+":5000/tasks") ##arrumar
+        return requests.post("http://"+public_ip+":5000/tasks", data=json.dumps(task))
 
 class TaskAPI(Resource):
     def __init__(self):
@@ -60,17 +62,29 @@ class TaskAPI(Resource):
         super(TaskAPI, self).__init__()
 
     def get(self, id):
-        return redirect("http://"+public_ip+":5000/tasks/"+id, code=302)
+        return requests.get("http://"+public_ip+":5000/tasks/"+id)
 
     def put(self, id):
-       return redirect("http://"+public_ip+":5000/tasks/"+id)##arrumar
+        args = self.reqparse.parse_args()
+        task = {
+            'title': args['title'],
+            'description': args['description'],
+			'done': args['done']
+        }
+        return requests.post("http://"+public_ip+":5000/tasks/"+id, data=json.dumps(task))
 
     def delete(self, id):
-        return redirect("http://"+public_ip+":5000/tasks/"+id)##arrumar
+		args = self.reqparse.parse_args()
+        task = {
+            'title': args['title'],
+            'description': args['description'],
+			'done': args['done']
+        }
+        return requests.delete("http://"+public_ip+":5000/tasks/"+id, data=json.dumps(task))
 
 class HealthCheck(Resource):
     def get(self):
-        return redirect("http://"+public_ip+":5000/healthcheck", code=302)
+        return requests.get("http://"+public_ip+":5000/healthcheck")
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/tasks/<id>', endpoint='task')
