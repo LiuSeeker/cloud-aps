@@ -43,7 +43,8 @@ class TaskListAPI(Resource):
         super(TaskListAPI, self).__init__()
 
     def get(self):
-        return requests.get("http://"+public_ip+":5000/tasks").json()
+        res = requests.get(url="http://"+public_ip+":5000/tasks").json()
+        return res.json()
 
     def post(self):
         args = self.reqparse.parse_args()
@@ -51,7 +52,8 @@ class TaskListAPI(Resource):
             'title': args['title'],
             'description': args['description']
         }
-        return requests.post("http://"+public_ip+":5000/tasks", data=json.dumps(task))
+        res = requests.post(url="http://"+public_ip+":5000/tasks", data=json.dumps(task))
+        return res.json()
 
 class TaskAPI(Resource):
     def __init__(self):
@@ -62,7 +64,8 @@ class TaskAPI(Resource):
         super(TaskAPI, self).__init__()
 
     def get(self, id):
-        return requests.get("http://"+public_ip+":5000/tasks/"+id)
+        res = requests.get(url="http://"+public_ip+":5000/tasks/"+id)
+        return res.json()
 
     def put(self, id):
         args = self.reqparse.parse_args()
@@ -71,7 +74,8 @@ class TaskAPI(Resource):
             'description': args['description'],
 			'done': args['done']
         }
-        return requests.post("http://"+public_ip+":5000/tasks/"+id, data=json.dumps(task))
+        res = requests.post(url="http://"+public_ip+":5000/tasks/"+id, data=json.dumps(task))
+        return res.text
 
     def delete(self, id):
 		args = self.reqparse.parse_args()
@@ -80,11 +84,12 @@ class TaskAPI(Resource):
             'description': args['description'],
 			'done': args['done']
         }
-        return requests.delete("http://"+public_ip+":5000/tasks/"+id, data=json.dumps(task))
+        res = requests.delete(url="http://"+public_ip+":5000/tasks/"+id, data=json.dumps(task))
+        return res.text
 
 class HealthCheck(Resource):
     def get(self):
-        return requests.get("http://"+public_ip+":5000/healthcheck")
+        return requests.get(url="http://"+public_ip+":5000/healthcheck")
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/tasks/<id>', endpoint='task')
